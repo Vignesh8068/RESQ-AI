@@ -1,14 +1,16 @@
-const CACHE_NAME = 'resq-ai-v2-round2';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/favicon.svg',
-  '/manifest.json',
-  '/standalone.html'
-];
+const CACHE_NAME = 'resq-ai-v3-ghpages';
 
-// Install: pre-cache static assets
+// Install: pre-cache static assets relative to service worker scope
 self.addEventListener('install', (event) => {
+  const scope = self.registration.scope;
+  const STATIC_ASSETS = [
+    scope,
+    `${scope}index.html`,
+    `${scope}favicon.svg`,
+    `${scope}manifest.json`,
+    `${scope}standalone.html`
+  ];
+
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
@@ -38,6 +40,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const scope = self.registration.scope;
+
   // For navigation requests (HTML pages), serve cached index.html on fail
   if (event.request.mode === 'navigate') {
     event.respondWith(
@@ -49,7 +53,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match('/index.html').then((cached) => cached || new Response('Offline', { status: 503 })))
+        .catch(() => caches.match(`${scope}index.html`).then((cached) => cached || new Response('Offline', { status: 503 })))
     );
     return;
   }

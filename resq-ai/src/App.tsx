@@ -72,7 +72,7 @@ export default function App() {
   return (
     <AppProvider>
       <CustomCursor />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AppRoutes />
       </BrowserRouter>
     </AppProvider>
