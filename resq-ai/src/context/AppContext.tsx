@@ -58,7 +58,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
         incidents: state.incidents.map((i) => (i.id === action.payload.id ? action.payload : i)),
       };
     case 'DELETE_INCIDENT':
-      return { ...state, incidents: state.incidents.filter((i) => i.id !== action.payload) };
+      return {
+        ...state,
+        incidents: state.incidents.filter((i) => i.id !== action.payload),
+        teams: state.teams.map((t) =>
+          t.assignedIncidentId === action.payload
+            ? { ...t, status: 'available', currentAssignment: undefined, assignedIncidentId: undefined }
+            : t
+        ),
+      };
     case 'SET_TEAMS':
       return { ...state, teams: action.payload };
     case 'ADD_TEAM':
@@ -69,7 +77,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
         teams: state.teams.map((t) => (t.id === action.payload.id ? action.payload : t)),
       };
     case 'DELETE_TEAM':
-      return { ...state, teams: state.teams.filter((t) => t.id !== action.payload) };
+      return {
+        ...state,
+        teams: state.teams.filter((t) => t.id !== action.payload),
+        incidents: state.incidents.map((inc) =>
+          inc.assignedTeamId === action.payload
+            ? { ...inc, assignedTeamId: undefined, assignedTeamName: undefined, status: inc.status === 'assigned' ? 'reported' : inc.status }
+            : inc
+        ),
+      };
     case 'ADD_NOTIFICATION':
       return { ...state, notifications: [action.payload, ...state.notifications] };
     case 'MARK_NOTIFICATION_READ':
@@ -95,6 +111,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'RESET_DEMO_DATA':
       localStorage.removeItem('resqai_incidents');
       localStorage.removeItem('resqai_teams');
+      localStorage.removeItem('resqai_history');
       return {
         ...state,
         incidents: DEMO_INCIDENTS,
@@ -176,8 +193,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (savedInc) {
         try {
           const parsed = JSON.parse(savedInc) as Incident[];
-          const userSubmitted = parsed.filter((i) => !i.isDemo);
-          dispatch({ type: 'SET_INCIDENTS', payload: [...userSubmitted, ...DEMO_INCIDENTS] });
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            dispatch({ type: 'SET_INCIDENTS', payload: parsed });
+          }
         } catch {}
       }
 
@@ -185,7 +203,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (savedTeams) {
         try {
           const parsedTeams = JSON.parse(savedTeams) as ResponseTeam[];
-          dispatch({ type: 'SET_TEAMS', payload: parsedTeams });
+          if (Array.isArray(parsedTeams) && parsedTeams.length > 0) {
+            dispatch({ type: 'SET_TEAMS', payload: parsedTeams });
+          }
+        } catch {}
+      }
+
+      const savedHistory = localStorage.getItem('resqai_history');
+      if (savedHistory) {
+        try {
+          const parsedHist = JSON.parse(savedHistory) as IncidentHistory[];
+          if (Array.isArray(parsedHist) && parsedHist.length > 0) {
+            dispatch({ type: 'RESTORE_DATA', payload: { history: parsedHist } });
+          }
         } catch {}
       }
       return;
@@ -262,8 +292,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!isSupabaseConfigured) {
       localStorage.setItem('resqai_incidents', JSON.stringify(state.incidents));
       localStorage.setItem('resqai_teams', JSON.stringify(state.teams));
+      localStorage.setItem('resqai_history', JSON.stringify(state.history));
     }
-  }, [state.incidents, state.teams]);
+  }, [state.incidents, state.teams, state.history]);
 
   // Apply dark/light theme
   useEffect(() => {
@@ -578,6 +609,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const nowIso = new Date().toISOString();
     const responseStartedAt = incident.responseStartedAt || nowIso;
+
+    // Release previously assigned team if reassigning
+    if (incident.assignedTeamId && incident.assignedTeamId !== teamId) {
+      const prevTeam = state.teams.find((t) => t.id === incident.assignedTeamId);
+      if (prevTeam) {
+        dispatch({
+          type: 'UPDATE_TEAM',
+          payload: {
+            ...prevTeam,
+            status: 'available',
+            currentAssignment: undefined,
+            assignedIncidentId: undefined,
+          },
+        });
+      }
+    }
 
     // Update Incident
     const updatedIncident: Incident = {

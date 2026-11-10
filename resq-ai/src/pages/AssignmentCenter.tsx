@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -24,6 +24,12 @@ export function AssignmentCenter() {
     ''
   );
   const [assignmentSuccess, setAssignmentSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (urlIncidentId) {
+      setSelectedIncidentId(urlIncidentId);
+    }
+  }, [urlIncidentId]);
 
   const selectedIncident = state.incidents.find((i) => i.id === selectedIncidentId);
 
