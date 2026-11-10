@@ -3,11 +3,14 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, AlertTriangle, Map, Users, BarChart3, Bell, Settings,
-  LogOut, Menu, X, Shield, FileText, Bot, Radio, ChevronRight, Sparkles
+  LogOut, Menu, X, Shield, FileText, Bot, Radio, ChevronRight, Sparkles,
+  Compass
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TRANSLATIONS } from '../utils/constants';
 import { InteractiveDemoModal } from '../components/InteractiveDemo';
+import { CommandCenterBackground } from '../components/CommandCenterBackground';
+import { ResqAssistantPanel } from '../components/ResqAssistantPanel';
 
 interface NavItem {
   label: string;
@@ -23,6 +26,7 @@ export function AppLayout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [demoOpen, setDemoOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const t = TRANSLATIONS[state.language];
 
   const isAdmin = state.user?.role === 'admin';
@@ -38,11 +42,12 @@ export function AppLayout() {
 
   const adminNav: NavItem[] = [
     { label: 'Command Center', icon: <LayoutDashboard size={18} />, path: '/admin' },
-    { label: 'Incident Management', icon: <AlertTriangle size={18} />, path: '/admin/incidents' },
+    { label: 'Incident Queue', icon: <AlertTriangle size={18} />, path: '/admin/incidents' },
+    { label: 'Smart Dispatch', icon: <Compass size={18} />, path: '/admin/assignments' },
     { label: 'AI Copilot', icon: <Bot size={18} />, path: '/admin/copilot' },
     { label: t.map, icon: <Map size={18} />, path: '/map' },
-    { label: 'Resources', icon: <Users size={18} />, path: '/admin/resources' },
-    { label: 'Analytics', icon: <BarChart3 size={18} />, path: '/admin/analytics' },
+    { label: 'Emergency Squads', icon: <Users size={18} />, path: '/admin/resources' },
+    { label: 'Mission Analytics', icon: <BarChart3 size={18} />, path: '/admin/analytics' },
     { label: t.notifications, icon: <Bell size={18} />, path: '/notifications', badge: unreadCount },
     { label: t.settings, icon: <Settings size={18} />, path: '/settings' },
   ];
@@ -55,7 +60,10 @@ export function AppLayout() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#080F1E]">
+    <div className="flex h-screen overflow-hidden bg-[#080F1E] relative">
+      {/* Tactical Command Center Background */}
+      <CommandCenterBackground />
+
       {/* Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -172,13 +180,24 @@ export function AppLayout() {
             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
           
+          {/* AI Copilot Quick Launcher Button */}
+          <button
+            onClick={() => setAssistantOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#35D9FF]/20 to-[#20C997]/20 border border-[#35D9FF]/40 text-[#35D9FF] text-xs font-bold flex items-center gap-1.5 hover:bg-[#35D9FF]/25 hover:scale-105 transition-all shadow-glow-cyan"
+            title="Open RESQ Operations Copilot"
+          >
+            <Bot size={15} className="text-[#35D9FF]" />
+            <span className="hidden sm:inline">AI Copilot</span>
+          </button>
+
           {/* Hackathon Demo Launcher Button */}
           <button
             onClick={() => setDemoOpen(true)}
             className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#FF4057]/20 via-[#FF9F43]/20 to-[#35D9FF]/20 border border-[#35D9FF]/40 text-white text-xs font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-glow-cyan"
           >
             <Sparkles size={14} className="text-[#35D9FF] animate-spin" />
-            <span>2-Min Live Simulation</span>
+            <span className="hidden md:inline">2-Min Live Simulation</span>
+            <span className="md:hidden">Simulate</span>
           </button>
 
           <div className="flex-1" />
@@ -186,7 +205,7 @@ export function AppLayout() {
           {/* Live status */}
           <div className="flex items-center gap-2 text-xs text-white/40">
             <div className="w-1.5 h-1.5 bg-[#20C997] rounded-full animate-pulse" />
-            Live
+            <span className="hidden sm:inline">Operations Live</span>
           </div>
           
           {/* Notifications bell */}
@@ -204,10 +223,23 @@ export function AppLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto custom-scroll">
+        <main className="flex-1 overflow-y-auto custom-scroll relative z-10">
           <Outlet />
         </main>
       </div>
+
+      {/* Floating Tactical Copilot FAB */}
+      <button
+        onClick={() => setAssistantOpen(true)}
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#35D9FF] to-[#20C997] text-[#080F1E] font-black p-3.5 rounded-2xl shadow-xl shadow-[#35D9FF]/20 hover:scale-110 active:scale-95 transition-all flex items-center gap-2 border border-white/20"
+        title="RESQ Operations Copilot"
+      >
+        <Bot size={22} className="animate-bounce" />
+        <span className="text-xs font-extrabold hidden md:inline">RESQ AI COPILOT</span>
+      </button>
+
+      {/* AI Copilot Panel */}
+      <ResqAssistantPanel isOpen={assistantOpen} onClose={() => setAssistantOpen(false)} />
 
       {/* Interactive Hackathon Demo Modal */}
       <InteractiveDemoModal isOpen={demoOpen} onClose={() => setDemoOpen(false)} />

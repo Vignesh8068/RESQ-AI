@@ -1,10 +1,11 @@
 import { Incident, ResponseTeam, Notification, IncidentHistory, AIAnalysis } from '../types';
+import { calculateIncidentPriority } from '../services/prioritizationEngine';
 
 // ============================================================
-// DEMO DATA – All demo records are clearly labelled
+// DEMO DATA – All records clearly identified as demonstration data
 // ============================================================
 
-export const DEMO_INCIDENTS: Incident[] = [
+const RAW_DEMO_INCIDENTS: Omit<Incident, 'priorityScore' | 'priorityTier' | 'priorityReasons' | 'priorityFactors'>[] = [
   {
     id: 'DEMO-INC-001',
     title: '[DEMO] Major Road Accident – NH-48 Junction',
@@ -22,6 +23,8 @@ export const DEMO_INCIDENTS: Incident[] = [
     isDemo: true,
     assignedTeamId: 'DEMO-TEAM-001',
     assignedTeamName: 'Fire & Rescue Unit Alpha',
+    assignedAt: new Date(Date.now() - 2700000).toISOString(),
+    responseStartedAt: new Date(Date.now() - 2700000).toISOString(),
     aiAnalysis: {
       suggestedCategory: 'road_accident',
       suggestedSeverity: 'critical',
@@ -35,7 +38,6 @@ export const DEMO_INCIDENTS: Incident[] = [
     createdAt: new Date(Date.now() - 3600000).toISOString(),
     updatedAt: new Date(Date.now() - 1800000).toISOString(),
     verifiedAt: new Date(Date.now() - 3000000).toISOString(),
-    responseStartedAt: new Date(Date.now() - 2700000).toISOString(),
   },
   {
     id: 'DEMO-INC-002',
@@ -108,6 +110,9 @@ export const DEMO_INCIDENTS: Incident[] = [
     isDemo: true,
     assignedTeamId: 'DEMO-TEAM-002',
     assignedTeamName: 'Medical Response Team Beta',
+    assignedAt: new Date(Date.now() - 85800000).toISOString(),
+    responseStartedAt: new Date(Date.now() - 85800000).toISOString(),
+    resolvedAt: new Date(Date.now() - 82800000).toISOString(),
     aiAnalysis: {
       suggestedCategory: 'medical',
       suggestedSeverity: 'critical',
@@ -121,8 +126,6 @@ export const DEMO_INCIDENTS: Incident[] = [
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 82800000).toISOString(),
     verifiedAt: new Date(Date.now() - 85200000).toISOString(),
-    responseStartedAt: new Date(Date.now() - 85800000).toISOString(),
-    resolvedAt: new Date(Date.now() - 82800000).toISOString(),
   },
   {
     id: 'DEMO-INC-005',
@@ -153,75 +156,175 @@ export const DEMO_INCIDENTS: Incident[] = [
   },
 ];
 
+// Enrich with Explainable Prioritization Engine calculations
+export const DEMO_INCIDENTS: Incident[] = RAW_DEMO_INCIDENTS.map((inc) => {
+  const prio = calculateIncidentPriority(inc);
+  return {
+    ...inc,
+    priorityScore: prio.score,
+    priorityTier: prio.tier,
+    priorityReasons: prio.reasons,
+    priorityFactors: prio.factors,
+  };
+});
+
 export const DEMO_TEAMS: ResponseTeam[] = [
   {
     id: 'DEMO-TEAM-001',
     name: 'Fire & Rescue Unit Alpha',
     type: 'fire_rescue',
-    status: 'assigned',
-    location: 'Central Fire Station, Chennai',
+    status: 'busy',
+    location: 'Central Fire Station, Egmore',
     latitude: 13.0878,
     longitude: 80.2785,
     currentAssignment: 'DEMO-INC-001',
+    assignedIncidentId: 'DEMO-INC-001',
     members: 8,
     contact: '+91 44 2345 6789',
+    totalDispatches: 42,
+    avgResponseTime: 8.4,
     isDemo: true,
+    operationalHistory: [
+      {
+        id: 'HIST-T1-1',
+        incidentId: 'DEMO-INC-001',
+        incidentTitle: 'Major Road Accident – NH-48 Junction',
+        assignedAt: new Date(Date.now() - 2700000).toISOString(),
+        status: 'active',
+      },
+      {
+        id: 'HIST-T1-2',
+        incidentId: 'DEMO-INC-PREV-1',
+        incidentTitle: 'Electrical Transformer Fire – T Nagar',
+        assignedAt: new Date(Date.now() - 172800000).toISOString(),
+        resolvedAt: new Date(Date.now() - 169200000).toISOString(),
+        durationMinutes: 60,
+        status: 'completed',
+      },
+    ],
   },
   {
     id: 'DEMO-TEAM-002',
     name: 'Medical Response Team Beta',
     type: 'medical_team',
     status: 'available',
-    location: 'Government General Hospital, Chennai',
+    location: 'Government General Hospital, Park Town',
     latitude: 13.0732,
     longitude: 80.2609,
     members: 5,
     contact: '+91 44 2534 2345',
+    totalDispatches: 68,
+    avgResponseTime: 6.2,
     isDemo: true,
+    operationalHistory: [
+      {
+        id: 'HIST-T2-1',
+        incidentId: 'DEMO-INC-004',
+        incidentTitle: 'Cardiac Arrest – Marina Beach',
+        assignedAt: new Date(Date.now() - 85800000).toISOString(),
+        resolvedAt: new Date(Date.now() - 82800000).toISOString(),
+        durationMinutes: 50,
+        status: 'completed',
+      },
+    ],
   },
   {
     id: 'DEMO-TEAM-003',
-    name: 'Ambulance Squad Delta',
+    name: 'Ambulance Squad Delta (ALS)',
     type: 'ambulance',
     status: 'available',
-    location: 'GEM Hospital, Chennai',
+    location: 'GEM Hospital, Kilpauk',
     latitude: 13.0631,
     longitude: 80.2411,
     members: 3,
     contact: '108',
+    totalDispatches: 114,
+    avgResponseTime: 5.8,
     isDemo: true,
+    operationalHistory: [],
   },
   {
     id: 'DEMO-TEAM-004',
-    name: 'NDRF Disaster Unit',
+    name: 'NDRF Disaster Rescue Battalion',
     type: 'disaster_rescue',
     status: 'available',
-    location: 'NDRF Base, Avadi, Chennai',
+    location: 'NDRF Regional HQ, Avadi',
     latitude: 13.1120,
     longitude: 80.1072,
-    members: 15,
+    members: 16,
     contact: '+91 44 2630 8900',
+    totalDispatches: 24,
+    avgResponseTime: 12.1,
     isDemo: true,
+    operationalHistory: [],
   },
   {
     id: 'DEMO-TEAM-005',
-    name: 'Fire & Rescue Unit Bravo',
+    name: 'Adyar Fire Unit Bravo',
     type: 'fire_rescue',
     status: 'offline',
-    location: 'Adyar Fire Station, Chennai',
+    location: 'Adyar Fire Station, Adyar',
     latitude: 13.0067,
     longitude: 80.2574,
     members: 7,
     contact: '101',
+    totalDispatches: 38,
+    avgResponseTime: 9.0,
     isDemo: true,
+    operationalHistory: [],
+  },
+  {
+    id: 'DEMO-TEAM-006',
+    name: 'Velachery Rapid Flood Rescue Unit',
+    type: 'flood_squad',
+    status: 'available',
+    location: 'Velachery Emergency Outpost',
+    latitude: 12.9815,
+    longitude: 80.2180,
+    members: 10,
+    contact: '+91 44 2243 1100',
+    totalDispatches: 19,
+    avgResponseTime: 7.5,
+    isDemo: true,
+    operationalHistory: [],
+  },
+  {
+    id: 'DEMO-TEAM-007',
+    name: 'Highway Vehicular Trauma Squad',
+    type: 'accident_squad',
+    status: 'available',
+    location: 'Maduravoyal Bypass Station',
+    latitude: 13.0650,
+    longitude: 80.1600,
+    members: 6,
+    contact: '+91 44 2478 9911',
+    totalDispatches: 53,
+    avgResponseTime: 7.1,
+    isDemo: true,
+    operationalHistory: [],
+  },
+  {
+    id: 'DEMO-TEAM-008',
+    name: 'Metropolitan Quick Response Team (QRT)',
+    type: 'general_emergency',
+    status: 'available',
+    location: 'Chennai Central Police Commissionerate',
+    latitude: 13.0780,
+    longitude: 80.2600,
+    members: 8,
+    contact: '112',
+    totalDispatches: 87,
+    avgResponseTime: 6.5,
+    isDemo: true,
+    operationalHistory: [],
   },
 ];
 
 export const DEMO_NOTIFICATIONS: Notification[] = [
   {
     id: 'DEMO-NOTIF-001',
-    title: '🚨 Critical Incident Reported',
-    message: '[DEMO] Major road accident at NH-48 Junction with trapped victim. Immediate response required.',
+    title: '🚨 Critical Priority Incident (Score: 92/100)',
+    message: '[DEMO] NH-48 junction multi-vehicle collision flagged as CRITICAL code red by Prioritization Engine.',
     type: 'critical',
     read: false,
     incidentId: 'DEMO-INC-001',
@@ -229,8 +332,8 @@ export const DEMO_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'DEMO-NOTIF-002',
-    title: '🔥 Fire Emergency – Anna Nagar',
-    message: '[DEMO] Active building fire reported. 20 residents potentially affected.',
+    title: '🔥 Structural Fire Alert (Score: 88/100)',
+    message: '[DEMO] Anna Nagar 4th floor residential fire with 20 trapped civilians requires high-flow suppression.',
     type: 'critical',
     read: false,
     incidentId: 'DEMO-INC-002',
@@ -238,8 +341,8 @@ export const DEMO_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'DEMO-NOTIF-003',
-    title: '✅ Incident Resolved',
-    message: '[DEMO] Medical emergency at Marina Beach has been resolved successfully.',
+    title: '✅ Mission Resolved & Squad Released',
+    message: '[DEMO] Medical response at Marina Beach concluded. Medical Response Team Beta marked AVAILABLE.',
     type: 'success',
     read: true,
     incidentId: 'DEMO-INC-004',
@@ -247,12 +350,12 @@ export const DEMO_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'DEMO-NOTIF-004',
-    title: '👥 Team Assigned',
-    message: '[DEMO] Fire & Rescue Unit Alpha assigned to NH-48 accident.',
+    title: '👥 Nearest Squad Dispatched via Haversine Engine',
+    message: '[DEMO] Fire & Rescue Unit Alpha (2.8 km away) successfully dispatched to NH-48 accident.',
     type: 'info',
     read: true,
     incidentId: 'DEMO-INC-001',
-    createdAt: new Date(Date.now() - 3300000).toISOString(),
+    createdAt: new Date(Date.now() - 2700000).toISOString(),
   },
 ];
 
@@ -260,50 +363,48 @@ export const DEMO_HISTORY: IncidentHistory[] = [
   {
     id: 'DEMO-HIST-001',
     incidentId: 'DEMO-INC-001',
-    action: 'Incident Reported',
-    details: 'Citizen report submitted via RESQ AI mobile',
+    action: 'Incident Created & Prioritized',
+    details: 'Initial report submitted. Prioritization Engine scored 92/100 (Critical Tier).',
     performedBy: 'Arjun Kumar (Citizen)',
     createdAt: new Date(Date.now() - 3600000).toISOString(),
   },
   {
     id: 'DEMO-HIST-002',
     incidentId: 'DEMO-INC-001',
-    action: 'AI Analysis Complete',
-    details: 'RESQ Intelligence classified as Critical Road Accident (94% confidence)',
-    performedBy: 'RESQ Intelligence (AI)',
+    action: 'AI Triage Completed',
+    details: 'RESQ Intelligence classified as Road Accident with trapped occupant hazard.',
+    performedBy: 'RESQ Intelligence',
     createdAt: new Date(Date.now() - 3550000).toISOString(),
   },
   {
     id: 'DEMO-HIST-003',
     incidentId: 'DEMO-INC-001',
     action: 'Incident Verified',
-    details: 'Field verification confirmed. Upgrading to critical priority.',
-    performedBy: 'Admin (Demo Admin)',
+    details: 'Command Chief confirmed incident credentials.',
+    performedBy: 'Command Chief (Admin)',
     createdAt: new Date(Date.now() - 3000000).toISOString(),
   },
   {
     id: 'DEMO-HIST-004',
     incidentId: 'DEMO-INC-001',
-    action: 'Team Assigned',
-    details: 'Fire & Rescue Unit Alpha dispatched to location',
-    performedBy: 'Admin (Demo Admin)',
+    action: 'Squad Assigned (Haversine Recommendation)',
+    details: 'Fire & Rescue Unit Alpha assigned as nearest compatible unit (2.8 km away).',
+    performedBy: 'Dispatcher Center',
     createdAt: new Date(Date.now() - 2700000).toISOString(),
   },
   {
     id: 'DEMO-HIST-005',
     incidentId: 'DEMO-INC-001',
-    action: 'Status: In Progress',
-    details: 'Rescue team on-site. Extrication operation underway.',
-    performedBy: 'Admin (Demo Admin)',
+    action: 'Operational Status: In Progress',
+    details: 'Response team on scene. Extrication tools engaged.',
+    performedBy: 'First Responder Alpha',
     createdAt: new Date(Date.now() - 1800000).toISOString(),
   },
 ];
 
-// AI Analysis helper
 export function analyzeIncident(title: string, description: string): AIAnalysis {
   const text = `${title} ${description}`.toLowerCase();
 
-  // Category detection
   let suggestedCategory: AIAnalysis['suggestedCategory'] = 'other';
   if (/fire|flame|burn|smoke|blaze/.test(text)) suggestedCategory = 'fire';
   else if (/accident|collision|crash|vehicle|car|truck|bike|road/.test(text)) suggestedCategory = 'road_accident';
@@ -311,46 +412,40 @@ export function analyzeIncident(title: string, description: string): AIAnalysis 
   else if (/flood|water|submerge|inundat|drown|river|lake|rain|typhoon|cyclone/.test(text)) suggestedCategory = 'flood';
   else if (/collapse|building|structure|wall|roof|debris|trapped/.test(text)) suggestedCategory = 'building_collapse';
 
-  // Severity detection
   let suggestedSeverity: AIAnalysis['suggestedSeverity'] = 'medium';
   const criticalKeywords = ['critical', 'trapped', 'unconscious', 'cardiac', 'collapse', 'mass casualty', 'multiple dead', 'explosion', 'major'];
-  const highKeywords = ['injured', 'injured', 'fire', 'flood', 'collision', 'ambulance', 'hospital', 'urgent', 'serious'];
+  const highKeywords = ['injured', 'fire', 'flood', 'collision', 'ambulance', 'hospital', 'urgent', 'serious'];
   const lowKeywords = ['minor', 'small', 'contained', 'no injuries', 'property only'];
 
   if (criticalKeywords.some(k => text.includes(k))) suggestedSeverity = 'critical';
   else if (highKeywords.some(k => text.includes(k))) suggestedSeverity = 'high';
   else if (lowKeywords.some(k => text.includes(k))) suggestedSeverity = 'low';
 
-  // Extract keywords
   const allKeywords = ['fire', 'flood', 'accident', 'collapse', 'injured', 'trapped', 'medical', 'emergency', 'critical', 'vehicle', 'water', 'smoke', 'cardiac', 'CPR', 'debris'];
   const keywords = allKeywords.filter(k => text.includes(k.toLowerCase()));
 
-  // Risk indicators
   const riskIndicators: string[] = [];
   if (/trapped|stuck/.test(text)) riskIndicators.push('Person(s) potentially trapped');
   if (/multiple|several|many|crowd/.test(text)) riskIndicators.push('Multiple people affected');
   if (/child|children|elderly|old/.test(text)) riskIndicators.push('Vulnerable individuals involved');
-  if (/fire|flame/.test(text)) riskIndicators.push('Active fire hazard');
-  if (/flood|water/.test(text)) riskIndicators.push('Flooding/water hazard');
-  if (/collapse|structural/.test(text)) riskIndicators.push('Structural collapse risk');
-  if (/gas|chemical|toxic|leak/.test(text)) riskIndicators.push('Hazardous materials possible');
-  if (riskIndicators.length === 0) riskIndicators.push('Standard emergency protocol applies');
+  if (/fire|flame/.test(text)) riskIndicators.push('Active thermal/fire hazard');
+  if (/flood|water/.test(text)) riskIndicators.push('Swift water/inundation hazard');
+  if (/collapse|structural/.test(text)) riskIndicators.push('Secondary structural collapse hazard');
+  if (riskIndicators.length === 0) riskIndicators.push('Standard initial hazard protocols apply');
 
-  // Recommended actions
-  const actions: string[] = ['Immediate human verification required', 'Review available response resources'];
-  if (suggestedCategory === 'fire') actions.push('Dispatch fire brigade', 'Ambulance standby', 'Evacuate vicinity');
-  else if (suggestedCategory === 'road_accident') actions.push('Send ambulance and fire rescue', 'Traffic control required', 'Assess extrication needs');
-  else if (suggestedCategory === 'medical') actions.push('Dispatch ALS ambulance', 'Alert nearest hospital', 'Send paramedic unit');
-  else if (suggestedCategory === 'flood') actions.push('Deploy boat rescue teams', 'Issue flood advisory', 'Set up relief camp');
-  else if (suggestedCategory === 'building_collapse') actions.push('Dispatch USAR team', 'Request heavy rescue equipment', 'Establish safety perimeter');
-  if (suggestedSeverity === 'critical') actions.unshift('PRIORITY: Immediate dispatch required');
+  const actions: string[] = ['Immediate human dispatcher verification required', 'Query location-based response squad recommendation'];
+  if (suggestedCategory === 'fire') actions.push('Dispatch fire suppression unit', 'Ambulance on standby', 'Evacuate perimeter');
+  else if (suggestedCategory === 'road_accident') actions.push('Dispatch extrication squad and ambulance', 'Request traffic control corridor', 'Assess trauma needs');
+  else if (suggestedCategory === 'medical') actions.push('Dispatch ALS ambulance', 'Alert nearest trauma reception', 'Dispatch paramedic unit');
+  else if (suggestedCategory === 'flood') actions.push('Deploy inflatable boat rescue squad', 'Issue civil flood warning', 'Coordinate shelter logistics');
+  else if (suggestedCategory === 'building_collapse') actions.push('Dispatch USAR rescue battalion', 'Request hydraulic heavy lifters', 'Safety perimeter 100m');
 
-  const confidence = 0.72 + (keywords.length * 0.03) + (riskIndicators.length * 0.02);
+  const confidence = 0.75 + (keywords.length * 0.03) + (riskIndicators.length * 0.02);
 
   return {
     suggestedCategory,
     suggestedSeverity,
-    summary: `${suggestedSeverity.toUpperCase()} ${suggestedCategory.replace('_', ' ')} incident detected. ${riskIndicators.length > 0 ? riskIndicators[0] + '.' : ''} Immediate coordination recommended.`,
+    summary: `${suggestedSeverity.toUpperCase()} ${suggestedCategory.replace('_', ' ')} incident detected. ${riskIndicators.length > 0 ? riskIndicators[0] + '.' : ''} Prioritization and dispatch recommended.`,
     riskIndicators,
     recommendedActions: actions.slice(0, 5),
     confidence: Math.min(confidence, 0.98),

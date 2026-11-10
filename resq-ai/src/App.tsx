@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { AnimatePresence } from 'framer-motion';
 
+// Global HUD Cursor
+import { CustomCursor } from './components/CustomCursor';
+
 // Layouts
 import { AppLayout } from './layouts/AppLayout';
 
@@ -14,6 +17,7 @@ import { ReportEmergency } from './pages/ReportEmergency';
 import { MyReports } from './pages/MyReports';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { IncidentManagement } from './pages/IncidentManagement';
+import { AssignmentCenter } from './pages/AssignmentCenter';
 import { LiveMap } from './pages/LiveMap';
 import { AICopilot } from './pages/AICopilot';
 import { ResourceManagement } from './pages/ResourceManagement';
@@ -50,6 +54,7 @@ function AppRoutes() {
           {/* Admin routes */}
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/incidents" element={<ProtectedRoute adminOnly><IncidentManagement /></ProtectedRoute>} />
+          <Route path="/admin/assignments" element={<ProtectedRoute adminOnly><AssignmentCenter /></ProtectedRoute>} />
           <Route path="/admin/copilot" element={<ProtectedRoute adminOnly><AICopilot /></ProtectedRoute>} />
           <Route path="/admin/resources" element={<ProtectedRoute adminOnly><ResourceManagement /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AnalyticsPage /></ProtectedRoute>} />
@@ -64,6 +69,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <AppProvider>
+      <CustomCursor />
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
