@@ -24,6 +24,7 @@ import { ResourceManagement } from './pages/ResourceManagement';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ActivityHistory } from './pages/ActivityHistory';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { state } = useApp();
@@ -58,6 +59,7 @@ function AppRoutes() {
           <Route path="/admin/copilot" element={<ProtectedRoute adminOnly><AICopilot /></ProtectedRoute>} />
           <Route path="/admin/resources" element={<ProtectedRoute adminOnly><ResourceManagement /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AnalyticsPage /></ProtectedRoute>} />
+          <Route path="/admin/history" element={<ProtectedRoute adminOnly><ActivityHistory /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

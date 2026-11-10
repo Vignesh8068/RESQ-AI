@@ -1,0 +1,31 @@
+{
+  "name": "RESQ AI – Emergency Response Platform",
+  "short_name": "RESQ AI",
+  "description": "Intelligent Emergency Response & Disaster Management Platform. Every Second Matters. Every Response Counts.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080F1E",
+  "theme_color": "#35D9FF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Command Center",
+      "url": "/admin",
+      "description": "Mission Command Dashboard"
+    },
+    {
+      "name": "Report Emergency",
+      "url": "/report",
+      "description": "File an emergency incident report"
+    }
+  ]
+}

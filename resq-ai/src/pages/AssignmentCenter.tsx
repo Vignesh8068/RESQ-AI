@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Navigation, CheckCircle2, AlertTriangle, Users, MapPin,
@@ -14,8 +15,13 @@ export function AssignmentCenter() {
 
   // Active unassigned incidents first, or any active incident
   const unassignedIncidents = state.incidents.filter((i) => i.status !== 'resolved');
+  const [searchParams] = useSearchParams();
+  const urlIncidentId = searchParams.get('incidentId');
   const [selectedIncidentId, setSelectedIncidentId] = useState<string>(
-    unassignedIncidents.find((i) => !i.assignedTeamId)?.id || unassignedIncidents[0]?.id || ''
+    urlIncidentId ||
+    unassignedIncidents.find((i) => !i.assignedTeamId)?.id ||
+    unassignedIncidents[0]?.id ||
+    ''
   );
   const [assignmentSuccess, setAssignmentSuccess] = useState<string | null>(null);
 

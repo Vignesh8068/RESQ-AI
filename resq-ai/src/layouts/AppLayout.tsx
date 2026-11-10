@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, AlertTriangle, Map, Users, BarChart3, Bell, Settings,
   LogOut, Menu, X, Shield, FileText, Bot, Radio, ChevronRight, Sparkles,
-  Compass
+  Compass, History
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TRANSLATIONS } from '../utils/constants';
@@ -48,6 +48,7 @@ export function AppLayout() {
     { label: t.map, icon: <Map size={18} />, path: '/map' },
     { label: 'Emergency Squads', icon: <Users size={18} />, path: '/admin/resources' },
     { label: 'Mission Analytics', icon: <BarChart3 size={18} />, path: '/admin/analytics' },
+    { label: 'Audit History', icon: <History size={18} />, path: '/admin/history' },
     { label: t.notifications, icon: <Bell size={18} />, path: '/notifications', badge: unreadCount },
     { label: t.settings, icon: <Settings size={18} />, path: '/settings' },
   ];
