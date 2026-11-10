@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-navy-950: #080F1E;
+    --color-navy-900: #101B30;
+    --color-navy-800: #162040;
+    --color-navy-700: #1D2B54;
+    --color-emergency: #FF4057;
+    --color-cyan: #35D9FF;
+    --color-success: #20C997;
+    --color-warning: #FF9F43;
+    --color-white: #F5F8FF;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-[#080F1E] text-[#F5F8FF] font-sans;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Glassmorphism card */
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+  .glass-card-hover:hover {
+    @apply border-white/20 bg-white/10;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(53, 217, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-[#35D9FF] to-[#FF4057] bg-clip-text text-transparent;
+  }
+
+  .gradient-text-cyan {
+    @apply bg-gradient-to-r from-[#35D9FF] to-[#4A90D9] bg-clip-text text-transparent;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-gradient-to-r from-[#FF4057] to-[#FF6B7A] text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:shadow-lg hover:shadow-red-500/25 hover:scale-[1.02]
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-cyan {
+    @apply bg-gradient-to-r from-[#35D9FF]/20 to-[#35D9FF]/10 text-[#35D9FF]
+           border border-[#35D9FF]/30 font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:bg-[#35D9FF]/25 hover:border-[#35D9FF]/50 hover:shadow-lg hover:shadow-cyan-500/20
+           active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-[#F5F8FF]/70 font-medium
+           px-4 py-2 rounded-xl transition-all duration-200
+           hover:bg-white/5 hover:text-[#F5F8FF];
+  }
+
+  /* Input */
+  .input-field {
+    @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3
+           text-[#F5F8FF] placeholder-white/30 outline-none
+           focus:border-[#35D9FF]/50 focus:bg-white/10 focus:ring-2 focus:ring-[#35D9FF]/10
+           transition-all duration-200;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border;
+  }
+
+  /* Sidebar nav item */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-white/60
+           transition-all duration-200 cursor-pointer
+           hover:bg-white/5 hover:text-white;
+  }
+  .nav-item.active {
+    @apply bg-gradient-to-r from-[#35D9FF]/10 to-transparent text-[#35D9FF]
+           border-l-2 border-[#35D9FF];
+  }
+
+  /* Pulsating ring for critical incidents */
+  .pulse-critical {
+    @apply relative;
+  }
+  .pulse-critical::before {
+    content: '';
+    @apply absolute inset-0 rounded-full bg-[#FF4057]/30 animate-ping;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply glass-card p-5 flex flex-col gap-2;
+  }
+
+  /* Scrollbar */
+  .custom-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(53, 217, 255, 0.3) rgba(16, 27, 48, 1);
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply rounded-lg shimmer;
+  }
+}
+
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(53, 217, 255, 0.5);
+  }
+
+  .border-gradient {
+    border: 1px solid transparent;
+    background: linear-gradient(#101B30, #101B30) padding-box,
+                linear-gradient(135deg, #35D9FF, #FF4057) border-box;
+  }
+
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.4s ease both;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Leaflet map overrides */
+.leaflet-container {
+  background: #101B30 !important;
+  border-radius: 1rem;
+}
+.leaflet-tile {
+  filter: hue-rotate(190deg) invert(90%) brightness(0.8) saturate(0.8);
+}
+.leaflet-popup-content-wrapper {
+  background: #162040 !important;
+  border: 1px solid rgba(53, 217, 255, 0.2) !important;
+  color: #F5F8FF !important;
+  border-radius: 12px !important;
+}
+.leaflet-popup-tip {
+  background: #162040 !important;
+}
+.leaflet-control-zoom a {
+  background: #162040 !important;
+  color: #35D9FF !important;
+  border-color: rgba(53, 217, 255, 0.2) !important;
+}

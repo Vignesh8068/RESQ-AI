@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080F1E" />
+    <meta name="description" content="RESQ AI – Intelligent Emergency Response & Disaster Management Platform. One Platform. Faster Response. Safer Lives." />
+    <title>RESQ AI – Emergency Response Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+      * { scroll-behavior: smooth; }
+      body { background: #080F1E; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #101B30; }
+      ::-webkit-scrollbar-thumb { background: #35D9FF33; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #35D9FF66; }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .shimmer {
+        background: linear-gradient(90deg, #101B30 25%, #162040 50%, #101B30 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
